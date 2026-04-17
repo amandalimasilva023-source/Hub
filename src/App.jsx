@@ -5,10 +5,15 @@ const SUPA_URL = "https://okupxlvdeglixmrxrffn.supabase.co"
 const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9rdXB4bHZkZWdsaXhtcnhyZmZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQyMTY1NDEsImV4cCI6MjA1OTc5MjU0MX0.YSPxkORpwwHej7J0FfmbrPZqgMlFLDHy6p_3sVlkXS0"
 
 async function supa(table, query = "") {
-  const res = await fetch(`${SUPA_URL}/rest/v1/${table}${query}`, {
-    headers: { apikey: SUPA_KEY, Authorization: `Bearer ${SUPA_KEY}` }
-  })
-  const data = await res.json(); return Array.isArray(data) ? data : []
+  try {
+    const res = await fetch(`${SUPA_URL}/rest/v1/${table}${query}`, {
+      headers: { apikey: SUPA_KEY, Authorization: `Bearer ${SUPA_KEY}` }
+    })
+    const data = await res.json()
+    return Array.isArray(data) ? data : []
+  } catch(e) {
+    return []
+  }
 }
 
 async function supaUpdate(table, id, data) {
@@ -17,6 +22,17 @@ async function supaUpdate(table, id, data) {
     headers: { apikey: SUPA_KEY, Authorization: `Bearer ${SUPA_KEY}`, "Content-Type": "application/json", Prefer: "return=minimal" },
     body: JSON.stringify(data)
   })
+}
+
+// ─── EVOLUTION API ────────────────────────────────────────────────────────────
+const EVO_URL = "https://evolution-api-production-970c.up.railway.app"
+const EVO_KEY = "hub_amanda_2024_secure"
+
+async function evo(path) {
+  const res = await fetch(`${EVO_URL}${path}`, {
+    headers: { apikey: EVO_KEY }
+  })
+  return res.json()
 }
 
 // ─── AGENTS ───────────────────────────────────────────────────────────────────
@@ -31,7 +47,9 @@ const CSS = `
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   .hub-root {
     font-family: 'Instrument Sans', system-ui, sans-serif;
-    min-height: 100vh; width: 100vw; overflow-x: hidden;
+    min-height: 100vh;
+    width: 100%;
+    max-width: 100%;
     background: hsl(220 20% 97%);
     color: hsl(222 47% 11%);
     --primary: hsl(213 80% 48%);
@@ -180,7 +198,7 @@ function HubPage({ onSelect }) {
           </div>
         </div>
       </header>
-      <main style={{position:"relative",zIndex:10,padding:"40px 40px 64px",maxWidth:1200,margin:"0 auto"}}>
+      <main style={{position:"relative",zIndex:10,padding:"40px 40px 64px",maxWidth:"100%",margin:"0 auto"}}>
         <p className="mono" style={{fontSize:10,letterSpacing:".12em",color:"var(--muted-fg)",marginBottom:8,textTransform:"uppercase"}}>01 / Automações Disponíveis</p>
         <div style={{display:"flex",alignItems:"flex-end",justifyContent:"space-between",marginBottom:32}}>
           <h1 style={{fontSize:44,fontWeight:900,letterSpacing:"-.02em",textTransform:"uppercase",lineHeight:1}}>Agentes de IA</h1>
@@ -194,7 +212,7 @@ function HubPage({ onSelect }) {
               <div style={{width:36,height:36,borderRadius:6,border:"1px solid var(--border)",background:"var(--muted)",display:"flex",alignItems:"center",justifyContent:"center",color:"var(--muted-fg)"}}>
                 <Icon name="briefcase" size={15} />
               </div>
-              <div style={{display:"flex",flexDirection:"column",gap:6,width:"100vw"}}>
+              <div style={{display:"flex",flexDirection:"column",gap:6,width:"100%"}}>
                 <h2 style={{fontSize:16,fontWeight:900,letterSpacing:"-.01em",textTransform:"uppercase",lineHeight:1.2}}>{agent.nome}</h2>
                 <p style={{fontSize:13,color:"var(--muted-fg)"}}>{agent.descricao}</p>
               </div>
@@ -539,7 +557,7 @@ function LeadsPage({ agent }) {
                         <div style={{position:"absolute",right:0,top:36,zIndex:50,background:"var(--card)",border:"1px solid var(--border)",borderRadius:6,boxShadow:"0 8px 24px rgba(0,0,0,0.1)",minWidth:140,padding:"4px 0"}}>
                           {STATUS_OPTIONS.map(s=>(
                             <button key={s} onClick={()=>setStatus(lead.id,s)}
-                              style={{display:"block",width:"100vw",textAlign:"left",padding:"7px 14px",fontSize:12,background:"none",border:"none",cursor:"pointer",color:statusColor(s),fontWeight:s===lead.status?700:400,fontFamily:"inherit"}}>
+                              style={{display:"block",width:"100%",textAlign:"left",padding:"7px 14px",fontSize:12,background:"none",border:"none",cursor:"pointer",color:statusColor(s),fontWeight:s===lead.status?700:400,fontFamily:"inherit"}}>
                               {s}
                             </button>
                           ))}
@@ -699,7 +717,7 @@ function OutboundPage({ agent }) {
               <div key={key}>
                 <label style={{fontSize:11,fontWeight:600,color:"var(--muted-fg)",display:"block",marginBottom:4}}>{label}</label>
                 <input type={type} placeholder={ph} value={form[key]} onChange={e=>setForm(f=>({...f,[key]:e.target.value}))}
-                  style={{width:"100vw",padding:"8px 12px",border:"1px solid var(--border)",borderRadius:6,fontSize:13,fontFamily:"inherit",color:"var(--fg)",background:"var(--card)"}} />
+                  style={{width:"100%",padding:"8px 12px",border:"1px solid var(--border)",borderRadius:6,fontSize:13,fontFamily:"inherit",color:"var(--fg)",background:"var(--card)"}} />
               </div>
             ))}
           </div>
@@ -741,10 +759,185 @@ function OutboundPage({ agent }) {
   )
 }
 
+// ─── GRUPOS PAGE ─────────────────────────────────────────────────────────────
+function GruposPage({ agent }) {
+  const [grupos, setGrupos] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [sel, setSel] = useState(null)
+  const [msgs, setMsgs] = useState([])
+  const [loadingMsgs, setLoadingMsgs] = useState(false)
+  const [busca, setBusca] = useState("")
+  const msgsRef = useRef(null)
+
+  useEffect(() => {
+    async function loadGrupos() {
+      setLoading(true)
+      try {
+        // Busca grupos da Evolution API
+        const data = await evo(`/group/fetchAllGroups/${agent.slug}?getParticipants=false`)
+        const lista = Array.isArray(data) ? data : []
+
+        // Para cada grupo busca última mensagem no Supabase
+        const gruposComMsg = await Promise.all(lista.map(async g => {
+          const jid = g.id || g.remoteJid || ""
+          const convs = await supa("conversas", `?whatsapp=eq.${jid}&agente_slug=eq.${agent.slug}&select=*`)
+          const conv = convs?.[0] || null
+          let ultimaMsg = null
+          if (conv) {
+            const msgs = await supa("mensagens", `?conversa_id=eq.${conv.id}&order=criado_em.desc&limit=1`)
+            ultimaMsg = msgs?.[0] || null
+          }
+          return { ...g, jid, conv, ultimaMsg }
+        }))
+
+        setGrupos(gruposComMsg)
+      } catch(e) {
+        console.error(e)
+      }
+      setLoading(false)
+    }
+    loadGrupos()
+  }, [agent.slug])
+
+  useEffect(() => {
+    if (!sel?.conv) { setMsgs([]); return }
+    setLoadingMsgs(true)
+    supa("mensagens", `?conversa_id=eq.${sel.conv.id}&order=criado_em.asc`)
+      .then(d => { setMsgs(d || []); setLoadingMsgs(false) })
+  }, [sel])
+
+  useEffect(() => {
+    if (msgsRef.current) msgsRef.current.scrollTop = msgsRef.current.scrollHeight
+  }, [msgs])
+
+  const filtrados = grupos.filter(g =>
+    (g.subject || g.name || "").toLowerCase().includes(busca.toLowerCase())
+  )
+
+  return (
+    <div className="fade-in" style={{display:"flex",flexDirection:"column",gap:16}}>
+      <div style={{display:"flex",alignItems:"center",gap:12}}>
+        <div style={{width:36,height:36,borderRadius:6,background:"rgba(16,185,129,0.1)",display:"flex",alignItems:"center",justifyContent:"center"}}>
+          <Icon name="users" size={17} color="var(--success)" />
+        </div>
+        <div>
+          <h1 style={{fontSize:22,fontWeight:900}}>Grupos</h1>
+          <p style={{fontSize:12,color:"var(--muted-fg)"}}>Grupos de WhatsApp conectados à instância</p>
+        </div>
+      </div>
+
+      <div className="glass" style={{display:"flex",overflow:"hidden",height:"calc(100vh - 200px)"}}>
+        {/* Lista de grupos */}
+        <div style={{width:280,flexShrink:0,borderRight:"1px solid var(--border)",display:"flex",flexDirection:"column"}}>
+          <div style={{padding:"10px 12px",borderBottom:"1px solid var(--border)"}}>
+            <div style={{display:"flex",alignItems:"center",gap:8,padding:"7px 10px",borderRadius:6,background:"var(--muted)",color:"var(--muted-fg)"}}>
+              <Icon name="search" size={13} />
+              <input placeholder="Buscar grupo..." value={busca} onChange={e=>setBusca(e.target.value)} />
+            </div>
+          </div>
+          <p style={{fontSize:10,color:"var(--muted-fg)",padding:"8px 12px 4px"}}>{loading ? "Carregando..." : `${filtrados.length} grupos`}</p>
+          <div style={{flex:1,overflowY:"auto"}}>
+            {loading ? (
+              <div style={{padding:24,textAlign:"center",color:"var(--muted-fg)",fontSize:12}}>Buscando grupos...</div>
+            ) : filtrados.length === 0 ? (
+              <div style={{padding:24,textAlign:"center",color:"var(--muted-fg)",fontSize:12}}>Nenhum grupo encontrado</div>
+            ) : filtrados.map((g, i) => {
+              const nome = g.subject || g.name || g.jid || "Grupo"
+              const preview = g.ultimaMsg?.texto === "[mídia]" ? "📎 Mídia" : (g.ultimaMsg?.texto || "Sem mensagens")
+              const temMsgs = !!g.conv
+              return (
+                <div key={g.jid} onClick={()=>setSel(g)}
+                  style={{padding:"10px 12px",cursor:"pointer",borderBottom:"1px solid var(--border)",
+                    background:sel?.jid===g.jid?"rgba(24,113,220,0.04)":undefined,
+                    borderLeft:sel?.jid===g.jid?"2px solid var(--primary)":"2px solid transparent",
+                    transition:"background .15s"}}>
+                  <div style={{display:"flex",gap:8,alignItems:"flex-start"}}>
+                    <div style={{width:34,height:34,borderRadius:"50%",background:"rgba(16,185,129,0.12)",
+                      display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:14}}>
+                      👥
+                    </div>
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                        <p style={{fontSize:12,fontWeight:700,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",maxWidth:150}}>{nome}</p>
+                        {temMsgs && <span style={{width:7,height:7,borderRadius:"50%",background:"var(--success)",display:"inline-block",flexShrink:0}} />}
+                      </div>
+                      <p style={{fontSize:11,color:"var(--muted-fg)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",marginTop:2}}>
+                        {preview.substring(0,40)}
+                      </p>
+                      <div style={{display:"flex",gap:4,marginTop:4}}>
+                        <span className="tag tag-wpp">grupo</span>
+                        {g.participants && <span className="tag tag-gray">{g.participants} membros</span>}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Chat do grupo */}
+        <div style={{flex:1,display:"flex",flexDirection:"column"}}>
+          {sel ? (
+            <>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 18px",borderBottom:"1px solid var(--border)"}}>
+                <div style={{display:"flex",alignItems:"center",gap:10}}>
+                  <div style={{width:34,height:34,borderRadius:"50%",background:"rgba(16,185,129,0.12)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>👥</div>
+                  <div>
+                    <p style={{fontSize:13,fontWeight:700}}>{sel.subject||sel.name||"Grupo"}</p>
+                    <p style={{fontSize:11,color:"var(--muted-fg)"}}>{sel.jid}</p>
+                  </div>
+                </div>
+                <span className="tag tag-wpp">grupo WhatsApp</span>
+              </div>
+              <div ref={msgsRef} style={{flex:1,overflowY:"auto",padding:"16px 18px",display:"flex",flexDirection:"column",gap:10}}>
+                {loadingMsgs ? (
+                  <div style={{textAlign:"center",color:"var(--muted-fg)",fontSize:12,marginTop:40}}>Carregando mensagens...</div>
+                ) : !sel.conv ? (
+                  <div style={{textAlign:"center",color:"var(--muted-fg)",fontSize:13,marginTop:40}}>
+                    <p style={{fontSize:32,marginBottom:8}}>💬</p>
+                    <p style={{fontWeight:700,color:"var(--fg)"}}>Nenhuma mensagem ainda</p>
+                    <p style={{fontSize:12,marginTop:4}}>As mensagens deste grupo aparecerão aqui quando chegarem</p>
+                  </div>
+                ) : msgs.length === 0 ? (
+                  <div style={{textAlign:"center",color:"var(--muted-fg)",fontSize:12,marginTop:40}}>Nenhuma mensagem registrada</div>
+                ) : msgs.map(msg=>(
+                  <div key={msg.id} style={{display:"flex",flexDirection:"column",alignItems:msg.bot?"flex-end":"flex-start"}}>
+                    {!msg.bot && (
+                      <p style={{fontSize:10,fontWeight:700,color:"var(--primary)",marginBottom:2,marginLeft:4}}>{msg.nome_contato||msg.telefone||"Membro"}</p>
+                    )}
+                    <div style={{
+                      maxWidth:"70%",
+                      background:msg.bot?"var(--primary)":"var(--muted)",
+                      color:msg.bot?"#fff":"var(--fg)",
+                      borderRadius:msg.bot?"14px 14px 4px 14px":"14px 14px 14px 4px",
+                      padding:"8px 14px",fontSize:13
+                    }}>
+                      <p style={{whiteSpace:"pre-wrap"}}>{msg.texto==="[mídia]"?"📎 Mídia recebida":msg.texto}</p>
+                      <p style={{fontSize:10,opacity:.6,marginTop:4,textAlign:"right"}}>{new Date(msg.criado_em).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:10,color:"var(--muted-fg)"}}>
+              <span style={{fontSize:48}}>👥</span>
+              <p style={{fontSize:15,fontWeight:700,color:"var(--fg)"}}>Selecione um grupo</p>
+              <p style={{fontSize:13}}>Escolha um grupo à esquerda para ver as mensagens</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── LAYOUT ───────────────────────────────────────────────────────────────────
 const MENU = [
   {label:"DASHBOARD",       icon:"dashboard",  path:"dashboard"},
   {label:"CONVERSAS",       icon:"chat",       path:"conversations"},
+  {label:"GRUPOS",          icon:"users",      path:"grupos"},
   {label:"LEADS",           icon:"users",      path:"leads"},
   {label:"ATENDIMENTOS",    icon:"headphones", path:"atendimentos"},
   {label:"INICIAR CONVERSA",icon:"outbound",   path:"outbound"},
@@ -753,7 +946,7 @@ const MENU = [
 function AgentLayout({ agent, onBack }) {
   const [page, setPage] = useState("dashboard")
   const currentLabel = MENU.find(m=>m.path===page)?.label || "DASHBOARD"
-  const PageComponent = { dashboard:DashboardPage, conversations:ConversasPage, leads:LeadsPage, atendimentos:AtendimentosPage, outbound:OutboundPage }[page] || DashboardPage
+  const PageComponent = { dashboard:DashboardPage, conversations:ConversasPage, grupos:GruposPage, leads:LeadsPage, atendimentos:AtendimentosPage, outbound:OutboundPage }[page] || DashboardPage
 
   return (
     <div style={{display:"flex",height:"100vh",overflow:"hidden"}}>
@@ -769,7 +962,7 @@ function AgentLayout({ agent, onBack }) {
           <p style={{fontSize:9.5,fontWeight:700,color:"var(--sidebar-primary)",textTransform:"uppercase",letterSpacing:".05em",lineHeight:1.3}}>{agent.nome}</p>
         </div>
         <div style={{padding:"10px 10px 0"}}>
-          <button onClick={onBack} className="nav-link" style={{width:"100vw",opacity:.55}}><Icon name="arrow_left" size={11} color="var(--sidebar-fg)" /> VOLTAR AO HUB</button>
+          <button onClick={onBack} className="nav-link" style={{width:"100%",opacity:.55}}><Icon name="arrow_left" size={11} color="var(--sidebar-fg)" /> VOLTAR AO HUB</button>
           <div style={{borderTop:"1px solid var(--sidebar-border)",margin:"8px 0"}} />
         </div>
         <nav style={{flex:1,padding:"0 8px",display:"flex",flexDirection:"column",gap:2}}>
