@@ -8,7 +8,7 @@ async function supa(table, query = "") {
   const res = await fetch(`${SUPA_URL}/rest/v1/${table}${query}`, {
     headers: { apikey: SUPA_KEY, Authorization: `Bearer ${SUPA_KEY}` }
   })
-  return res.json()
+  const data = await res.json(); return Array.isArray(data) ? data : []
 }
 
 async function supaUpdate(table, id, data) {
