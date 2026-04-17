@@ -194,7 +194,7 @@ function HubPage({ onSelect }) {
               <div style={{width:36,height:36,borderRadius:6,border:"1px solid var(--border)",background:"var(--muted)",display:"flex",alignItems:"center",justifyContent:"center",color:"var(--muted-fg)"}}>
                 <Icon name="briefcase" size={15} />
               </div>
-              <div style={{display:"flex",flexDirection:"column",gap:6,width:"100%"}}>
+              <div style={{display:"flex",flexDirection:"column",gap:6,width:"100vw"}}>
                 <h2 style={{fontSize:16,fontWeight:900,letterSpacing:"-.01em",textTransform:"uppercase",lineHeight:1.2}}>{agent.nome}</h2>
                 <p style={{fontSize:13,color:"var(--muted-fg)"}}>{agent.descricao}</p>
               </div>
@@ -539,7 +539,7 @@ function LeadsPage({ agent }) {
                         <div style={{position:"absolute",right:0,top:36,zIndex:50,background:"var(--card)",border:"1px solid var(--border)",borderRadius:6,boxShadow:"0 8px 24px rgba(0,0,0,0.1)",minWidth:140,padding:"4px 0"}}>
                           {STATUS_OPTIONS.map(s=>(
                             <button key={s} onClick={()=>setStatus(lead.id,s)}
-                              style={{display:"block",width:"100%",textAlign:"left",padding:"7px 14px",fontSize:12,background:"none",border:"none",cursor:"pointer",color:statusColor(s),fontWeight:s===lead.status?700:400,fontFamily:"inherit"}}>
+                              style={{display:"block",width:"100vw",textAlign:"left",padding:"7px 14px",fontSize:12,background:"none",border:"none",cursor:"pointer",color:statusColor(s),fontWeight:s===lead.status?700:400,fontFamily:"inherit"}}>
                               {s}
                             </button>
                           ))}
@@ -699,7 +699,7 @@ function OutboundPage({ agent }) {
               <div key={key}>
                 <label style={{fontSize:11,fontWeight:600,color:"var(--muted-fg)",display:"block",marginBottom:4}}>{label}</label>
                 <input type={type} placeholder={ph} value={form[key]} onChange={e=>setForm(f=>({...f,[key]:e.target.value}))}
-                  style={{width:"100%",padding:"8px 12px",border:"1px solid var(--border)",borderRadius:6,fontSize:13,fontFamily:"inherit",color:"var(--fg)",background:"var(--card)"}} />
+                  style={{width:"100vw",padding:"8px 12px",border:"1px solid var(--border)",borderRadius:6,fontSize:13,fontFamily:"inherit",color:"var(--fg)",background:"var(--card)"}} />
               </div>
             ))}
           </div>
@@ -769,7 +769,7 @@ function AgentLayout({ agent, onBack }) {
           <p style={{fontSize:9.5,fontWeight:700,color:"var(--sidebar-primary)",textTransform:"uppercase",letterSpacing:".05em",lineHeight:1.3}}>{agent.nome}</p>
         </div>
         <div style={{padding:"10px 10px 0"}}>
-          <button onClick={onBack} className="nav-link" style={{width:"100%",opacity:.55}}><Icon name="arrow_left" size={11} color="var(--sidebar-fg)" /> VOLTAR AO HUB</button>
+          <button onClick={onBack} className="nav-link" style={{width:"100vw",opacity:.55}}><Icon name="arrow_left" size={11} color="var(--sidebar-fg)" /> VOLTAR AO HUB</button>
           <div style={{borderTop:"1px solid var(--sidebar-border)",margin:"8px 0"}} />
         </div>
         <nav style={{flex:1,padding:"0 8px",display:"flex",flexDirection:"column",gap:2}}>
