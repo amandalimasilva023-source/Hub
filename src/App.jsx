@@ -949,7 +949,7 @@ function AgentLayout({ agent, onBack }) {
   const PageComponent = { dashboard:DashboardPage, conversations:ConversasPage, grupos:GruposPage, leads:LeadsPage, atendimentos:AtendimentosPage, outbound:OutboundPage }[page] || DashboardPage
 
   return (
-    <div style={{display:"flex",height:"100vh",overflow:"hidden"}}>
+    <div style={{display:"flex",height:"100vh",width:"100vw",overflow:"hidden"}}>
       <aside style={{width:216,flexShrink:0,display:"flex",flexDirection:"column",background:"var(--sidebar-bg)",borderRight:"1px solid var(--sidebar-border)"}}>
         <div style={{padding:"14px 12px 10px",borderBottom:"1px solid var(--sidebar-border)"}}>
           <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
