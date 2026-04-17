@@ -31,7 +31,7 @@ const CSS = `
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   .hub-root {
     font-family: 'Instrument Sans', system-ui, sans-serif;
-    min-height: 100vh;
+    min-height: 100vh; width: 100vw; overflow-x: hidden;
     background: hsl(220 20% 97%);
     color: hsl(222 47% 11%);
     --primary: hsl(213 80% 48%);
