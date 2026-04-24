@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react"
 
 // ─── SUPABASE ─────────────────────────────────────────────────────────────────
 const SUPA_URL = "https://okupxlvdeglixmrxrffn.supabase.co"
-const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9rdXB4bHZkZWdsaXhtcnhyZmZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQyMTY1NDEsImV4cCI6MjA1OTc5MjU0MX0.YSPxkORpwwHej7J0FfmbrPZqgMlFLDHy6p_3sVlkXS0"
+const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9rdXB4bHZkZWdsaXhtcnhyZmZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3MjExNDgsImV4cCI6MjA5MTI5NzE0OH0.52VhFz112oRemaFI0NDDUPr3BFuMJe7YmL6gFingZQo"
 
 async function supa(table, query = "") {
   try {
